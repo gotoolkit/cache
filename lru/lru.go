@@ -60,6 +60,36 @@ func (c *Cache) Get(key Key) (value interface{}, ok bool) {
 	return
 }
 
+// Remove 缓存移除键值
+func (c *Cache) Remove(key Key) {
+	if c.cache == nil {
+		return
+	}
+	if nln, hit := c.cache[key]; hit {
+		c.removeNode(nln)
+	}
+}
+
+// Len 缓存长度
+func (c *Cache) Len() int {
+	if c.cache == nil {
+		return 0
+	}
+	return c.ll.Len()
+}
+
+// Clear 缓存清除
+func (c *Cache) Clear() {
+	if c.OnEvicted != nil {
+		for _, n := range c.cache {
+			kv := n.Value.(*entry)
+			c.OnEvicted(kv.key, kv.value)
+		}
+	}
+	c.ll = nil
+	c.cache = nil
+}
+
 // RemoveOldest 缓存移除最老的节点
 func (c *Cache) RemoveOldest() {
 	if c.cache == nil {
